@@ -59,6 +59,11 @@ class EntryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(34, $array['data']['age']);
     }
 
+    public function testToArray()
+    {
+        $this->assertInternalType('array', $this->entry->toArray());
+    }
+
     /**
      * @expectedException \BadMethodCallException
      */

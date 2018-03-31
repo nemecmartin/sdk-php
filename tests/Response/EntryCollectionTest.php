@@ -167,4 +167,9 @@ class EntryCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array', $array);
         $this->assertSame(2, count($array['data']));
     }
+
+    public function testToArray()
+    {
+        $this->assertInternalType('array', $this->collection->toArray());
+    }
 }
