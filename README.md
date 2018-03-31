@@ -18,7 +18,7 @@ For PHP driven applications, use this SDK to more easily communicate with your D
 
 ### Via Composer
 
-You can install the SDK using [Composer](http://getcomposer.org) by adding `directus/sdk` to composer `require` list.
+You can install the SDK using [Composer](http://getcomposer.org) by adding `directus/sdk` to your `composer.json` `require` list.
 ```json
 {
   "require": {
@@ -32,11 +32,13 @@ You can install the SDK using [Composer](http://getcomposer.org) by adding `dire
 }
 ```
 
-Make sure `dev` is the `minimum-stability`.
+Make sure `dev` is the `minimum-stability`. We are using a forked version of Zend-DB, and because it's not released under any new name or version, we have to set `minimum-stability` to `dev` in order to composer find the repository in GitHuba and install Zend-DB.
 
 Then run `composer install`.
 
-To use the SDK you have to include the [composer autoload](https://getcomposer.org/doc/01-basic-usage.md#autoloading)
+Composer will download all dependencies and copy them into a directory with the name of `vendor`.
+
+To use the SDK you have to include the [composer autoload](https://getcomposer.org/doc/01-basic-usage.md#autoloading). The composer autoload is a file that is located in the `vendor` directory, named `autoload.php`.
 
 ```php
 require_once 'vendor/autoload.php';
@@ -44,7 +46,7 @@ require_once 'vendor/autoload.php';
 
 ## Usage
 
-### Database connection
+### Database Connection
 
 ``` php
 require 'vendor/autoload.php';
@@ -67,7 +69,7 @@ $config = [
 $client = \Directus\SDK\ClientFactory::create($config);
 $articles = $client->getItems('articles');
 
-foreach($articles as $article) {
+foreach ($articles as $article) {
     echo $article->title . '<br>';
 }
 ```
@@ -82,11 +84,11 @@ require 'vendor/autoload.php';
 $client = \Directus\SDK\ClientFactory::create('user-token', [
     // the sub-domain in your instance url
     'instance_key' => 'user--instance',
-    'version' => '1' // Optional - default 1
+    'version' => '1' // Optional - default 1.1
 ]);
 
 $articles = $client->getItems('articles');
-foreach($articles as $article) {
+foreach ($articles as $article) {
     echo $article->title . '<br>';
 }
 ```
@@ -99,30 +101,30 @@ require 'vendor/autoload.php';
 $client = \Directus\SDK\ClientFactory::create('user-token', [
     // Directus API Path without its version
     'base_url' => 'http://directus.local',
-    'version' => '1' // Optional - default 1
+    'version' => '1' // Optional - default 1.1
 ]);
 
 $articles = $client->getItems('articles');
-foreach($articles as $article) {
+foreach ($articles as $article) {
     echo $article->title . '<br>';
 }
 ```
 
 ## Getting the whole response
 
-The whole response is an `Entry` or `EntryCollection` object, it depends if it's a single item or a collection of items.
+The whole response is either an `Entry` or `EntryCollection` object, it depends whether the result is a single item or a collection of items.
 
-While it can be interact like an array it's not an actual array.
+While the attribute can be accessed and be set like an array it's not an actual array.
 
 Ex:
 
 ```php
-// OK
 $articles = $client->getItems('articles');
+// OK
 $title = $articles['title'];
 
-// Error
 $articles = $client->getItems('articles');
+// Error
 $data = array_merge(['title' => 'Default'], $articles);
 ```
 
@@ -139,7 +141,7 @@ $data = array_merge(['title' => 'Default'], $articlesArray);
 
 A response include data and metadata, by default interacting with the `EntryCollection` or `Entry` you are interacting with the "data" object.
 
- ### Getting the data as an array
+### Getting the data as an array
 
 ```php
 $articles = $client->getItems('articles');
@@ -147,7 +149,7 @@ $articlesArray = $articles->getData();
 ```
 
 ## Metadata
-The metadata is another Entry type object which wrap the metadata information, can interact like an array but it's not an array.
+The metadata is another `Entry` object which wrap the metadata information, it can also access and set data like an array but it's not an array.
 
 
 ### Getting the metadata
