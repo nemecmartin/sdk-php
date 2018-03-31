@@ -22,7 +22,7 @@ You can install the SDK using [Composer](http://getcomposer.org) by adding `dire
 ```json
 {
   "require": {
-    "directus/sdk": "0.9.*"
+    "directus/sdk": "~1.0.0"
   },
   "minimum-stability": "dev",
   "repositories": [{
