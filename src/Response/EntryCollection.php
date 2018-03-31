@@ -166,7 +166,7 @@ class EntryCollection implements ResponseInterface, \IteratorAggregate, \ArrayAc
      */
     public function toArray()
     {
-        return $this-getRawData();
+        return $this->getRawData();
     }
 
     /**
