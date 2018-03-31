@@ -144,18 +144,16 @@ abstract class BaseClientRemote extends AbstractClient
 
         if (isset($options['base_url'])) {
             $this->baseUrl = rtrim($options['base_url'], '/');
-            $this->baseEndpoint = $this->baseUrl . '/api';
         }
 
         $instanceKey = isset($options['instance_key']) ? $options['instance_key'] : false;
         if ($instanceKey) {
             $this->instanceKey = $instanceKey;
             $this->baseUrl = sprintf($this->hostedBaseUrlFormat, $instanceKey);
-            $this->baseEndpoint = $this->baseUrl . '/api';
         }
 
         $this->apiVersion = isset($options['version']) ? $options['version'] : $this->getDefaultAPIVersion();
-        $this->baseEndpoint .= '/' . $this->getAPIVersion() . '/';
+        $this->baseEndpoint = $this->baseUrl . '/api/' . $this->getAPIVersion();
 
         $this->setHTTPClient($this->getDefaultHTTPClient());
     }

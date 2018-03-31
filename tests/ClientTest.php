@@ -12,11 +12,18 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      */
     protected $httpClient;
 
+    /**
+     * @var \GuzzleHttp\Handler\MockHandler
+     */
+    protected $mockHandler;
+
     public function setUp()
     {
         parent::setUp();
 
         $this->client = \Directus\SDK\ClientFactory::create('token');
+        $mockHandler = $this->mockHandler = new \GuzzleHttp\Handler\MockHandler();
+        $this->client->setHTTPClient(new \GuzzleHttp\Client(['handler' => $mockHandler]));
         $this->httpClient = $this->client->getHTTPClient();
     }
 
@@ -30,7 +37,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->setAccessToken('newToken');
         $this->assertSame('newToken', $client->getAccessToken());
 
-        $this->assertEquals(1, $client->getAPIVersion());
+        $this->assertSame($client->getDefaultAPIVersion(), $client->getAPIVersion());
         $this->assertNull($client->getInstanceKey());
     }
 
@@ -40,7 +47,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             'base_url' => 'http://directus.local'
         ]);
 
-        $this->assertSame('http://directus.local/api/1', $client->getBaseEndpoint());
+        $this->assertSame('http://directus.local/api/' . $client->getDefaultAPIVersion(), $client->getBaseEndpoint());
 
         $client = \Directus\SDK\ClientFactory::create('token', [
             'base_url' => 'http://directus.local',
@@ -58,7 +65,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client = \Directus\SDK\ClientFactory::create('token', ['instance_key' => $instanceKey]);
 
         $expectedBaseUrl = 'https://'.$instanceKey.'.directus.io';
-        $expectedEndpoint = $expectedBaseUrl . '/api/1';
+        $expectedEndpoint = $expectedBaseUrl . '/api/' . $client->getDefaultAPIVersion();
         $this->assertSame($expectedBaseUrl, $client->getBaseUrl());
         $this->assertSame($expectedEndpoint, $client->getBaseEndpoint());
 
@@ -76,7 +83,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client = $this->client;
         $path = $client->buildPath($client::TABLE_ENTRIES_ENDPOINT, 'articles');
         $request = $this->client->buildRequest('GET', $path);
-        $this->assertInstanceOf('\GuzzleHttp\Message\Request', $request);
+        $this->assertInstanceOf(\GuzzleHttp\Psr7\Request::class, $request);
     }
 
     public function testEndpoints()
@@ -293,15 +300,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     protected function mockResponse($path)
     {
-        static $mock = null;
-        if ($mock === null) {
-            $mock = new \GuzzleHttp\Subscriber\Mock();
-        }
-
-        $mockPath = __DIR__.'/Mock/'.$path;
+        $mockPath = __DIR__ . '/Mock/'.$path;
         $mockContent = file_get_contents($mockPath);
-        $mock->addResponse($mockContent);
-
-        $this->httpClient->getEmitter()->attach($mock);
+        $response = \GuzzleHttp\Psr7\parse_response($mockContent);
+        $this->mockHandler->append($response);
     }
 }
