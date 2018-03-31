@@ -131,7 +131,7 @@ class Entry implements ResponseInterface, \ArrayAccess
      */
     public function toArray()
     {
-        return $this-getRawData();
+        return $this->getRawData();
     }
 
     /**
