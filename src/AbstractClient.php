@@ -85,7 +85,7 @@ abstract class AbstractClient implements RequestsInterface
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT, ['cost' => 12]);
         }
 
-        if (ArrayUtils::has($data, 'avatar_file_id')) {
+        if (ArrayUtils::has($data, 'avatar_file_id') && $data['avatar_file_id'] instanceof File) {
             $data['avatar_file_id'] = $this->processFile($data['avatar_file_id']);
         }
 
