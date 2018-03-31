@@ -12,7 +12,7 @@ For PHP driven applications, use this SDK to more easily communicate with your D
 
 ## Requirements
 
-PHP version 5.4 or greater.
+- PHP version 5.5 or greater.
 
 ## Install
 
