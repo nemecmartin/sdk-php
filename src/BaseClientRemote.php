@@ -153,7 +153,7 @@ abstract class BaseClientRemote extends AbstractClient
         }
 
         $this->apiVersion = isset($options['version']) ? $options['version'] : $this->getDefaultAPIVersion();
-        $this->baseEndpoint = $this->baseUrl . '/api/' . $this->getAPIVersion();
+        $this->baseEndpoint = $this->baseUrl . '/api/' . $this->getAPIVersion() . '/';
 
         $this->setHTTPClient($this->getDefaultHTTPClient());
     }
