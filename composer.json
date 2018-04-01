@@ -6,7 +6,7 @@
     "require": {
         "php": ">=5.5.0",
         "directus/config": "^1.0.0",
-        "directus/database": "^1.0.0",
+        "directus/database": "^1.0.1",
         "directus/permissions": "^1.0.0",
         "directus/filesystem": "^1.0.0",
         "directus/hash": "^1.0.0",
