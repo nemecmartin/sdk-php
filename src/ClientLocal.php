@@ -11,6 +11,8 @@
 namespace Directus\SDK;
 
 use Directus\Database\Connection;
+use Directus\Database\Object\Column;
+use Directus\Database\Object\Table;
 use Directus\Database\TableGateway\BaseTableGateway;
 use Directus\Database\TableGateway\DirectusActivityTableGateway;
 use Directus\Database\TableGateway\DirectusMessagesTableGateway;
@@ -60,7 +62,11 @@ class ClientLocal extends AbstractClient
      */
     public function getTables(array $params = [])
     {
-        return $this->createResponseFromData(TableSchema::getTablesSchema($params));
+        $tables = array_map(function(Table $table) {
+            return $table->toArray();
+        }, TableSchema::getTablesSchema($params));
+
+        return $this->createResponseFromData(['data' => $tables]);
     }
 
     /**
@@ -68,7 +74,7 @@ class ClientLocal extends AbstractClient
      */
     public function getTable($tableName)
     {
-        return $this->createResponseFromData(TableSchema::getSchemaArray($tableName));
+        return $this->createResponseFromData(['data' => TableSchema::getSchemaArray($tableName)]);
     }
 
     /**
@@ -76,7 +82,11 @@ class ClientLocal extends AbstractClient
      */
     public function getColumns($tableName, array $params = [])
     {
-        return $this->createResponseFromData(TableSchema::getColumnSchemaArray($tableName, $params));
+        $columns = array_map(function(Column $column) {
+            return $column->toArray();
+        }, TableSchema::getTableColumnsSchema($tableName, $params));
+
+        return $this->createResponseFromData(['data' => $columns]);
     }
 
     /**
@@ -84,7 +94,9 @@ class ClientLocal extends AbstractClient
      */
     public function getColumn($tableName, $columnName)
     {
-        return $this->createResponseFromData(TableSchema::getColumnSchema($tableName, $columnName)->toArray());
+        return $this->createResponseFromData([
+            'data' => TableSchema::getColumnSchema($tableName, $columnName)->toArray()
+        ]);
     }
 
     /**
