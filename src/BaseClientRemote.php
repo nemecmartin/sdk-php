@@ -153,7 +153,7 @@ abstract class BaseClientRemote extends AbstractClient
         }
 
         $this->apiVersion = isset($options['version']) ? $options['version'] : $this->getDefaultAPIVersion();
-        $this->baseEndpoint = $this->baseUrl . '/api/' . $this->getAPIVersion() . '/';
+        $this->baseEndpoint = $this->baseUrl . '/api/' . $this->getAPIVersion();
 
         $this->setHTTPClient($this->getDefaultHTTPClient());
     }
@@ -353,7 +353,7 @@ abstract class BaseClientRemote extends AbstractClient
             ];
 
             $body = ArrayUtils::get($options, 'body', null);
-            $uri = UriResolver::resolve(new Uri($this->getBaseEndpoint(), '/'), new Uri($path));
+            $uri = UriResolver::resolve(new Uri($this->getBaseEndpoint() . '/'), new Uri($path));
 
             if ($body) {
                 $body = json_encode($body);
