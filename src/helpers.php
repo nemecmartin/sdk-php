@@ -61,3 +61,108 @@ if (!function_exists('sorting_by_key')) {
     }
 }
 
+if (!function_exists('get_columns_flat_at')) {
+    /**
+     * Get all the columns name in the given level
+     *
+     * @param array $columns
+     * @param int $level
+     *
+     * @return array
+     */
+    function get_columns_flat_at(array $columns, $level = 0)
+    {
+        $names = [];
+
+        foreach ($columns as $column) {
+            $parts = explode('.', $column);
+
+            if (isset($parts[$level])) {
+                $names[] = $parts[$level];
+            }
+        }
+
+        return $names;
+    }
+}
+
+if (!function_exists('get_csv_flat_columns')) {
+    /**
+     * Gets a CSV flat columns list from the given array
+     *
+     * @param array $columns
+     * @param null $prefix
+     *
+     * @return string
+     */
+    function get_csv_flat_columns(array $columns, $prefix = null)
+    {
+        $flatColumns = [];
+        $prefix = $prefix === null ? '' : $prefix . '.';
+
+        foreach ($columns as $key => $value) {
+            if (is_array($value)) {
+                $value = get_csv_flat_columns($value, $prefix . $key);
+            } else {
+                $value = $prefix . $key;
+            }
+
+            $flatColumns[] = $value;
+        }
+
+        return implode(',', $flatColumns);
+    }
+}
+
+if (!function_exists('get_array_flat_columns')) {
+    /**
+     * Gets an array flat columns list from the given array
+     *
+     * @param $columns
+     *
+     * @return array
+     */
+    function get_array_flat_columns($columns)
+    {
+        // TODO: make sure array is passed???
+        return explode(',', get_csv_flat_columns($columns ?: []));
+    }
+}
+if (!function_exists('get_unflat_columns')) {
+    /**
+     * Gets the unflat version of flat (dot-notated) column list
+     *
+     * @param string|array $columns
+     *
+     * @return array
+     */
+    function get_unflat_columns($columns)
+    {
+        $names = [];
+
+        if (!is_array($columns)) {
+            $columns = explode(',', $columns);
+        }
+
+        foreach ($columns as $column) {
+            $parts = explode('.', $column, 2);
+
+            if (isset($parts[0])) {
+                if (!isset($names[$parts[0]])) {
+                    $names[$parts[0]] = null;
+                }
+
+                if (isset($parts[1])) {
+                    if ($names[$parts[0]] === null) {
+                        $names[$parts[0]] = [];
+                    }
+
+                    $child = get_unflat_columns($parts[1]);
+                    $names[$parts[0]][key($child)] = current($child);
+                };
+            }
+        }
+
+        return $names;
+    }
+}
