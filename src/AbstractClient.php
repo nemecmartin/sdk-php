@@ -80,10 +80,6 @@ abstract class AbstractClient implements RequestsInterface
     protected function processDataOnDirectusUsers($data)
     {
         $data = ArrayUtils::omit($data, ['id', 'user', 'access_token', 'last_login', 'last_access', 'last_page']);
-        if (ArrayUtils::has($data, 'password')) {
-            // @TODO: use Auth hash password
-            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT, ['cost' => 12]);
-        }
 
         if (ArrayUtils::has($data, 'avatar_file_id') && $data['avatar_file_id'] instanceof File) {
             $data['avatar_file_id'] = $this->processFile($data['avatar_file_id']);

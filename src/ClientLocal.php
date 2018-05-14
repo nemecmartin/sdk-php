@@ -765,4 +765,16 @@ class ClientLocal extends AbstractClient
 
         return $this->tableGateways[$tableName];
     }
+
+    public function processDataOnDirectusUsers($data)
+    {
+        $data = parent::processDataOnDirectusUsers($data);
+
+        if (ArrayUtils::has($data, 'password')) {
+            // @TODO: use Auth hash password
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT, ['cost' => 12]);
+        }
+
+        return $data;
+    }
 }
