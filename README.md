@@ -5,7 +5,7 @@
 </p>
 
 <h1 align="center">
-  Directus PHP SDK
+  Directus 6 PHP SDK (Legacy)
 </h1>
 
 <h3 align="center">
