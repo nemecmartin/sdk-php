@@ -15,14 +15,14 @@ class EntryCollectionTest extends \PHPUnit_Framework_TestCase
     protected $data2 = [];
 
     /**
-     * @var \Directus\SDK\Response\EntryCollection
+     * @var \Directus\SDK\Response\ItemCollection
      */
     protected $collection;
 
     /**
      * API 1.1 Collection
      *
-     * @var \Directus\SDK\Response\EntryCollection
+     * @var \Directus\SDK\Response\ItemCollection
      */
     protected $collection2;
 
@@ -60,7 +60,7 @@ class EntryCollectionTest extends \PHPUnit_Framework_TestCase
                 ],
             ]
         ];
-        $this->collection = new \Directus\SDK\Response\EntryCollection($this->data);
+        $this->collection = new \Directus\SDK\Response\ItemCollection($this->data);
 
         $this->data2 = [
             'meta' => [
@@ -98,7 +98,7 @@ class EntryCollectionTest extends \PHPUnit_Framework_TestCase
                 ],
             ]
         ];
-        $this->collection2 = new \Directus\SDK\Response\EntryCollection($this->data2);
+        $this->collection2 = new \Directus\SDK\Response\ItemCollection($this->data2);
     }
 
     public function testCollection()

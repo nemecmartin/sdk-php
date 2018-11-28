@@ -60,7 +60,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getTables(array $params = [])
+    public function getCollections(array $params = [])
     {
         $tables = array_map(function(Table $table) {
             return $table->toArray();
@@ -72,7 +72,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getTable($tableName)
+    public function getCollection($tableName)
     {
         return $this->createResponseFromData(['data' => TableSchema::getSchemaArray($tableName)]);
     }
@@ -80,7 +80,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getColumns($tableName, array $params = [])
+    public function getFields($tableName, array $params = [])
     {
         $columns = array_map(function(Column $column) {
             return $column->toArray();
@@ -92,7 +92,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getColumn($tableName, $columnName)
+    public function getField($tableName, $columnName)
     {
         return $this->createResponseFromData([
             'data' => TableSchema::getColumnSchema($tableName, $columnName)->toArray()
@@ -140,7 +140,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getGroups(array $params = [])
+    public function getRoles(array $params = [])
     {
         return $this->getItems('directus_groups', $params);
     }
@@ -148,7 +148,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getGroup($id, array $params = [])
+    public function getRole($id, array $params = [])
     {
         return $this->getItem('directus_groups', $id, $params);
     }
@@ -156,7 +156,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritDoc
      */
-    public function getGroupPrivileges($groupID)
+    public function getRolePermissions($groupID)
     {
         $this->getItems('directus_privileges', [
             'filter' => [
@@ -190,27 +190,6 @@ class ClientLocal extends AbstractClient
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getSettingsByCollection($collectionName)
-    {
-        $connection = $this->container->get('connection');
-        $acl = $this->container->get('acl');
-        $tableGateway = new DirectusSettingsTableGateway($connection, $acl);
-
-        $data = [
-            'meta' => [
-                'table' => 'directus_settings',
-                'type' => 'entry',
-                'settings_collection' => $collectionName
-            ],
-            'data' => $tableGateway->fetchCollection($collectionName)
-        ];
-
-        return $this->createResponseFromData($data);
-    }
-
-    /**
      * @inheritdoc
      */
     public function updateSettings($collection, array $data)
@@ -221,40 +200,8 @@ class ClientLocal extends AbstractClient
 
         $tableGateway->setValues($collection, $data);
 
-        return $this->getSettingsByCollection($collection);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getMessages($userId = null)
-    {
-        $connection = $this->container->get('connection');
-        $acl = $this->container->get('acl');
-
-        if ($userId === null) {
-            $userId = $acl->getUserId();
-        }
-
-        $messagesTableGateway = new DirectusMessagesTableGateway($connection, $acl);
-        $result = $messagesTableGateway->fetchMessagesInboxWithHeaders($userId);
-
-        return $this->createResponseFromData($result);
-    }
-
-    public function getMessage($id, $userId = null)
-    {
-        $connection = $this->container->get('connection');
-        $acl = $this->container->get('acl');
-
-        if ($userId === null) {
-            $userId = $acl->getUserId();
-        }
-
-        $messagesTableGateway = new DirectusMessagesTableGateway($connection, $acl);
-        $message = $messagesTableGateway->fetchMessageWithRecipients($id, $userId);
-
-        return $this->createResponseFromData($message);
+        // TODO: Replace this call, settings are not grouped anymore
+        // return $this->getSettingsByCollection($collection);
     }
 
     /**
@@ -376,29 +323,18 @@ class ClientLocal extends AbstractClient
         return $this->deleteItem('directus_files', $ids, $hard);
     }
 
-    public function createPreferences($data)
-    {
-        if (!ArrayUtils::contains($data, ['title', 'table_name'])) {
-            throw new \Exception('title and table_name are required');
-        }
-
-        $acl = $this->container->get('acl');
-        $data['user'] = $acl->getUserId();
-
-        return $this->createItem('directus_preferences', $data);
-    }
-
     /**
      * @inheritdoc
      */
-    public function createBookmark($data)
+    public function createCollectionPresets($data)
     {
         $acl = $this->container->get('acl');
         $data['user'] = $acl->getUserId();
 
-        $preferences = $this->createPreferences(ArrayUtils::pick($data, [
-            'title', 'table_name', 'sort', 'status', 'search_string', 'sort_order', 'columns_visible', 'user'
-        ]));
+        // TODO: Replace createPreferences
+        // $preferences = $this->createPreferences(ArrayUtils::pick($data, [
+        //     'title', 'table_name', 'sort', 'status', 'search_string', 'sort_order', 'columns_visible', 'user'
+        // ]));
 
         $title = $preferences->title;
         $tableName = $preferences->table_name;
@@ -415,7 +351,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function getBookmark($id)
+    public function getCollectionPreset($id)
     {
         return $this->getItem('directus_bookmarks', $id);
     }
@@ -423,7 +359,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function getBookmarks($userId = null)
+    public function getCollectionPresets($userId = null)
     {
         $filters = [];
         if ($userId !== null) {
@@ -438,90 +374,27 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function createColumn($data)
+    public function createField($data)
     {
-        $data = $this->parseColumnData($data);
+        // TODO: This method has been removed
+        // $data = $this->parseColumnData($data);
 
         $tableGateway = $this->getTableGateway($data['table_name']);
 
         $tableGateway->addColumn($data['table_name'], ArrayUtils::omit($data, ['table_name']));
 
-        return $this->getColumn($data['table_name'], $data['column_name']);
+        return $this->getField($data['table_name'], $data['column_name']);
     }
 
     /**
      * @inheritdoc
      */
-    public function createGroup(array $data)
+    public function createRole(array $data)
     {
         return $this->createItem('directus_groups', $data);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function createMessage(array $data)
-    {
-        $this->requiredAttributes(['from', 'message', 'subject'], $data);
-        $this->requiredOneAttribute(['to', 'toGroup'], $data);
-
-        $recipients = $this->getMessagesTo($data);
-        $recipients = explode(',', $recipients);
-        ArrayUtils::remove($data, ['to', 'toGroup']);
-
-        $groupRecipients = [];
-        $userRecipients = [];
-        foreach ($recipients as $recipient) {
-            $typeAndId = explode('_', $recipient);
-            if ($typeAndId[0] == 0) {
-                $userRecipients[] = $typeAndId[1];
-            } else {
-                $groupRecipients[] = $typeAndId[1];
-            }
-        }
-
-        $ZendDb = $this->container->get('connection');
-        $acl = $this->container->get('acl');
-        if (count($groupRecipients) > 0) {
-            $usersTableGateway = new DirectusUsersTableGateway($ZendDb, $acl);
-            $result = $usersTableGateway->findActiveUserIdsByGroupIds($groupRecipients);
-            foreach ($result as $item) {
-                $userRecipients[] = $item['id'];
-            }
-        }
-
-        $userRecipients[] = $acl->getUserId();
-
-        $messagesTableGateway = new DirectusMessagesTableGateway($ZendDb, $acl);
-        $id = $messagesTableGateway->sendMessage($data, array_unique($userRecipients), $acl->getUserId());
-
-        if ($id) {
-            $Activity = new DirectusActivityTableGateway($ZendDb, $acl);
-            $data['id'] = $id;
-            $Activity->recordMessage($data, $acl->getUserId());
-        }
-
-        $message = $messagesTableGateway->fetchMessageWithRecipients($id, $acl->getUserId());
-        $response = [
-            'meta' => [
-                'type' => 'item',
-                'table' => 'directus_messages'
-            ],
-            'data' => $message
-        ];
-
-        return $this->createResponseFromData($response);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function sendMessage(array $data)
-    {
-        return $this->createMessage($data);
-    }
-
-    public function createPrivileges(array $data)
+    public function createPermissions(array $data)
     {
         $connection = $this->container->get('connection');
         $acl = $this->container->get('acl');
@@ -538,7 +411,7 @@ class ClientLocal extends AbstractClient
         return $this->createResponseFromData($response);
     }
 
-    public function createTable($name, array $data = [])
+    public function createCollection($name, array $data = [])
     {
         $isTableNameAlphanumeric = preg_match("/[a-z0-9]+/i", $name);
         $zeroOrMoreUnderscoresDashes = preg_match("/[_-]*/i", $name);
@@ -573,75 +446,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function createColumnUIOptions(array $data)
-    {
-        $this->requiredAttributes(['table', 'column', 'ui', 'options'], $data);
-        $tableGateway = $this->getTableGateway('directus_ui');
-
-        $table = $data['table'];
-        $column = $data['column'];
-        $ui = $data['ui'];
-
-        $data = $data['options'];
-        $keys = ['table_name' => $table, 'column_name' => $column, 'ui_name' => $ui];
-        $uis = to_name_value($data, $keys);
-
-        $column_settings = [];
-        foreach ($uis as $col) {
-            $existing = $tableGateway->select(['table_name' => $table, 'column_name' => $column, 'ui_name' => $ui, 'name' => $col['name']])->toArray();
-            if (count($existing) > 0) {
-                $col['id'] = $existing[0]['id'];
-            }
-            array_push($column_settings, $col);
-        }
-        $tableGateway->updateCollection($column_settings);
-
-        $connection = $this->container->get('connection');
-        $acl = $this->container->get('acl');
-        $UiOptions = new DirectusUiTableGateway($connection, $acl);
-        $response = $UiOptions->fetchOptions($table, $column, $ui);
-
-        if (!$response) {
-            $response = [
-                'error' => [
-                    'message' => sprintf('unable_to_find_column_%s_options_for_%s', ['column' => $column, 'ui' => $ui])
-                ],
-                'success' => false
-            ];
-        } else {
-            $response = [
-                'meta' => [
-                    'type' => 'item',
-                    'table' => 'directus_ui'
-                ],
-                'data' => $response
-            ];
-        }
-
-        return $this->createResponseFromData($response);
-    }
-
-    public function getPreferences($table, $user)
-    {
-        $acl = $this->container->get('acl');
-        $connection = $this->container->get('connection');
-        $preferencesTableGateway = new DirectusPreferencesTableGateway($connection, $acl);
-
-        $response = [
-            'meta' => [
-                'type' => 'item',
-                'table' => 'directus_preferences'
-            ],
-            'data' => $preferencesTableGateway->fetchByUserAndTableAndTitle($user, $table)
-        ];
-
-        return $this->createResponseFromData($response);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function deleteBookmark($id, $hard = false)
+    public function deleteCollectionPresets($id, $hard = false)
     {
         return $this->deleteItem('directus_bookmarks', $id, $hard);
     }
@@ -649,7 +454,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function deleteColumn($name, $table)
+    public function deleteField($name, $table)
     {
         $tableGateway = $this->getTableGateway($table);
         $success = $tableGateway->dropColumn($name);
@@ -670,7 +475,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function deleteGroup($id, $hard = false)
+    public function deleteRole($id, $hard = false)
     {
         return $this->deleteItem('directus_groups', $id, $hard);
     }
@@ -678,7 +483,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function deleteTable($name)
+    public function deleteCollection($name)
     {
         $tableGateway = $this->getTableGateway($name);
         $success = $tableGateway->drop();
@@ -696,7 +501,7 @@ class ClientLocal extends AbstractClient
         return $this->createResponseFromData($response);
     }
 
-    public function getActivity(array $params = [])
+    public function getActivityList(array $params = [])
     {
         $connection = $this->container->get('connection');
         $acl = $this->container->get('acl');
@@ -710,7 +515,7 @@ class ClientLocal extends AbstractClient
     /**
      * @inheritdoc
      */
-    public function getRandom(array $options = [])
+    public function getRandomString(array $options = [])
     {
         $length = (int) ArrayUtils::get($options, 'length', 32);
 

@@ -8,7 +8,7 @@ class EntryTest extends \PHPUnit_Framework_TestCase
     protected $data = [];
 
     /**
-     * @var \Directus\SDK\Response\Entry
+     * @var \Directus\SDK\Response\Item
      */
     protected $entry;
 
@@ -21,7 +21,7 @@ class EntryTest extends \PHPUnit_Framework_TestCase
             'age' => 34
         ];
 
-        $this->entry = new \Directus\SDK\Response\Entry($this->data);
+        $this->entry = new \Directus\SDK\Response\Item($this->data);
     }
 
     public function testEntry11()
@@ -31,7 +31,7 @@ class EntryTest extends \PHPUnit_Framework_TestCase
             'data' => $this->data
         ];
 
-        $entry = new \Directus\SDK\Response\Entry($data);
+        $entry = new \Directus\SDK\Response\Item($data);
         $this->assertEquals($this->data, $entry->getData());
         $this->assertNotNull($entry->getMetaData());
     }

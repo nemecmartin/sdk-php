@@ -22,39 +22,219 @@ class ClientRemote extends BaseClientRemote
     /**
      * @inheritdoc
      */
-    public function getTables(array $params = [])
+    public function getActivityList(array $params = [])
     {
-        return $this->performRequest('GET', static::TABLE_LIST_ENDPOINT);
+        return $this->performRequest('GET', 'activity', [
+            'query' => $params
+        ]);
     }
 
     /**
      * @inheritdoc
      */
-    public function getTable($tableName)
+    public function getActivity($id, array $params = [])
     {
-        $path = $this->buildPath(static::TABLE_INFORMATION_ENDPOINT, $tableName);
-
-        return $this->performRequest('GET', $path);
+        return $this->performRequest('GET', 'activity/' . $this->parseId($id), [
+            'query' => $params
+        ]);
     }
 
     /**
      * @inheritdoc
      */
-    public function getColumns($tableName, array $params = [])
+    public function createComment($collection, $item, $message)
     {
-        $path = $this->buildPath(static::COLUMN_LIST_ENDPOINT, $tableName);
-
-        return $this->performRequest('GET', $path);
+        return $this->performRequest('POST', 'activity/comment', [
+            'body' => [
+                'collection' => $collection,
+                'item' => $item,
+                'comment' => $message,
+            ]
+        ]);
     }
 
     /**
      * @inheritdoc
      */
-    public function getColumn($tableName, $columnName)
+    public function updateComment($id, $message)
     {
-        $path = $this->buildPath(static::COLUMN_INFORMATION_ENDPOINT, [$tableName, $columnName]);
+        return $this->performRequest('PATCH', 'activity/comment/' . $id, [
+            'body' => [
+                'comment' => $message,
+            ]
+        ]);
+    }
 
-        return $this->performRequest('GET', $path);
+    /**
+     * @inheritdoc
+     */
+    public function deleteComment($id, array $params = [])
+    {
+        $this->performRequest('DELETE', 'activity/comment/' . $id);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createCollection($name, array $data, array $params = [])
+    {
+        return $this->performRequest('POST', 'collections', [
+            'body' => array_merge($data, [
+                'collection' => $name
+            ]),
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function updateCollection($name, array $data, array $params = [])
+    {
+        return $this->performRequest('PATCH', 'collections/' . $name, [
+            'body' => array_merge($data, [
+                'collection' => $name
+            ]),
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCollections(array $params = [])
+    {
+        return $this->performRequest('GET', 'collections', [
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCollection($name, array $params = [])
+    {
+        return $this->performRequest('GET', 'collections/' . $this->parseId($name), [
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function deleteCollection($name)
+    {
+        return $this->performRequest('DELETE', 'collections/' . $name);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createCollectionPresets(array $data, array $params = [])
+    {
+        return $this->performRequest('POST', 'collection_presets', [
+            'body' => $data,
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCollectionPreset($id, array $params = [])
+    {
+        return $this->performRequest('GET', 'collection_presets/' . $this->parseId($id), [
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCollectionPresets(array $params = [])
+    {
+        return $this->performRequest('GET', 'collection_presets', [
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function updateCollectionPreset($id, array $data, array $params = [])
+    {
+        $this->performRequest('PATCH', 'collection_presets/' . $id, [
+            'body' => $data,
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function deleteCollectionPresets($id, array $params = [])
+    {
+        $this->performRequest('DELETE', 'collection_presets/' . $id, [
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createField($collection, $name, array $data, array $params = [])
+    {
+        return $this->performRequest('POST', 'fields/' . $collection, [
+            'body' => array_merge($data, [
+                'field' => $name
+            ]),
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFields($collection, array $params = [])
+    {
+        return $this->performRequest('GET', 'fields/' . $collection);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAllFields(array $params = [])
+    {
+        return $this->performRequest('GET', 'fields', [
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getField($collection, $name)
+    {
+        return $this->performRequest('GET', sprintf('fields/%s/%s', $collection, $name));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function updateField($collection, $name, array $data, array $params = [])
+    {
+        return $this->performRequest('PATCH', sprintf('fields/%s/%s', $collection, $name), [
+            'body' => $data,
+            'query' => $params,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function deleteField($collection, $name)
+    {
+        $this->performRequest('DELETE', sprintf('fields/%s/%s', $collection, $name));
     }
 
     /**
@@ -82,7 +262,7 @@ class ClientRemote extends BaseClientRemote
      */
     public function getUsers(array $params = [])
     {
-        return $this->getItems('directus_users', $params);
+        return $this->performRequest('GET', $this->getProject() . '/users', ['query' => $params]);
     }
 
     /**
@@ -90,13 +270,13 @@ class ClientRemote extends BaseClientRemote
      */
     public function getUser($id, array $params = [])
     {
-        return $this->getItem($id, 'directus_users', $params);
+        return $this->performRequest('GET', $this->getProject() . '/users/' . $id, ['query' => $params]);
     }
 
     /**
      * @inheritdoc
      */
-    public function getGroups()
+    public function getRoles()
     {
         return $this->performRequest('GET', static::GROUP_LIST_ENDPOINT);
     }
@@ -104,7 +284,7 @@ class ClientRemote extends BaseClientRemote
     /**
      * @inheritdoc
      */
-    public function getGroup($groupID)
+    public function getRole($groupID)
     {
         $path = $this->buildPath(static::GROUP_INFORMATION_ENDPOINT, $groupID);
 
@@ -114,7 +294,7 @@ class ClientRemote extends BaseClientRemote
     /**
      * @inheritdoc
      */
-    public function getGroupPrivileges($groupID)
+    public function getRolePermissions($groupID)
     {
         $path = $this->buildPath(static::GROUP_PRIVILEGES_ENDPOINT, $groupID);
 
@@ -150,16 +330,6 @@ class ClientRemote extends BaseClientRemote
     /**
      * @inheritdoc
      */
-    public function getSettingsByCollection($collectionName)
-    {
-        $path = $this->buildPath(static::SETTING_COLLECTION_GET_ENDPOINT, $collectionName);
-
-        return $this->performRequest('GET', $path);
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function updateSettings($collection, array $data)
     {
         $path = $this->buildPath(static::SETTING_COLLECTION_UPDATE_ENDPOINT, $collection);
@@ -167,30 +337,6 @@ class ClientRemote extends BaseClientRemote
         return $this->performRequest('PUT', $path, [
             'body' => $data
         ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getMessages($userId = null)
-    {
-        if ($userId !== null) {
-            $path = $this->buildPath(static::MESSAGES_USER_LIST_ENDPOINT, $userId);
-        } else {
-            $path = $this->buildPath(static::MESSAGES_LIST_ENDPOINT);
-        }
-
-        return $this->performRequest('GET', $path);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getMessage($id)
-    {
-        $path = $this->buildPath(static::MESSAGES_GET_ENDPOINT, $id);
-
-        return $this->performRequest('GET', $path);
     }
 
     /**
@@ -290,80 +436,10 @@ class ClientRemote extends BaseClientRemote
         return $this->deleteItem('directus_files', $id, $hard);
     }
 
-    public function createPreferences($data)
-    {
-        $this->requiredAttributes(['title', 'table_name'], $data);
-
-        $tableName = ArrayUtils::get($data, 'table_name');
-        $path = $this->buildPath(static::TABLE_PREFERENCES_ENDPOINT, $tableName);
-        $data = $this->processData($tableName, $data);
-
-        return $this->performRequest('POST', $path, ['body' => $data]);
-    }
-
     /**
      * @inheritdoc
      */
-    public function createBookmark($data)
-    {
-        $preferences = $this->createPreferences(ArrayUtils::pick($data, [
-            'title', 'table_name', 'sort', 'status', 'search_string', 'sort_order', 'columns_visible'
-        ]));
-
-        $title = $preferences->title;
-        $tableName = $preferences->table_name;
-        $bookmarkData = [
-            'section' => 'search',
-            'title' => $title,
-            'url' => 'tables/' . $tableName . '/pref/' . $title
-        ];
-
-        $path = $this->buildPath(static::BOOKMARKS_CREATE_ENDPOINT);
-        $bookmarkData = $this->processData($tableName, $bookmarkData);
-
-        return $this->performRequest('POST', $path, ['body' => $bookmarkData]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getBookmark($id)
-    {
-        $path = $this->buildPath(static::BOOKMARKS_READ_ENDPOINT, $id);
-
-        return $this->performRequest('GET', $path);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getBookmarks($userId = null)
-    {
-        if ($userId !== null) {
-            $path = $this->buildPath(static::BOOKMARKS_USER_ENDPOINT, $userId);
-        } else {
-            $path = $this->buildPath(static::BOOKMARKS_ALL_ENDPOINT);
-        }
-
-        return $this->performRequest('GET', $path);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function createColumn($data)
-    {
-        $data = $this->parseColumnData($data);
-
-        return $this->performRequest('POST', $this->buildPath(static::COLUMN_CREATE_ENDPOINT, $data['table_name']), [
-            'body' => $data
-        ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function createGroup(array $data)
+    public function createRole(array $data)
     {
         return $this->performRequest('POST', static::GROUP_CREATE_ENDPOINT, [
             'body' => $data
@@ -373,31 +449,7 @@ class ClientRemote extends BaseClientRemote
     /**
      * @inheritdoc
      */
-    public function createMessage(array $data)
-    {
-        $this->requiredAttributes(['from', 'message', 'subject'], $data);
-        $this->requiredOneAttribute(['to', 'toGroup'], $data);
-
-        $data['recipients'] = $this->getMessagesTo($data);
-        ArrayUtils::remove($data, ['to', 'toGroup']);
-
-        return $this->performRequest('POST', static::MESSAGES_CREATE_ENDPOINT, [
-            'body' => $data
-        ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function sendMessage(array $data)
-    {
-        return $this->createMessage($data);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function createPrivileges(array $data)
+    public function createPermissions(array $data)
     {
         $this->requiredAttributes(['group_id', 'table_name'], $data);
 
@@ -406,68 +458,10 @@ class ClientRemote extends BaseClientRemote
         ]);
     }
 
-    public function createTable($name, array $params = [])
-    {
-        $data = [
-            'addTable' => true,
-            'table_name' => $name
-        ];
-
-        return $this->performRequest('POST', static::TABLE_CREATE_ENDPOINT, [
-            'body' => $data
-        ]);
-    }
-
     /**
      * @inheritdoc
      */
-    public function createColumnUIOptions(array $data)
-    {
-        $this->requiredAttributes(['table', 'column', 'ui', 'options'], $data);
-
-        $path = $this->buildPath(static::COLUMN_OPTIONS_CREATE_ENDPOINT, [
-            $data['table'],
-            $data['column'],
-            $data['ui']
-        ]);
-
-        $data = ArrayUtils::get($data, 'options');
-
-        return $this->performRequest('POST', $path, [
-            'body' => $data
-        ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getPreferences($table, $user = null)
-    {
-        return $this->performRequest('POST', $this->buildPath(static::TABLE_PREFERENCES_ENDPOINT, $table));
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function deleteBookmark($id, $hard = false)
-    {
-        return $this->deleteItem('directus_bookmarks', $id, $hard);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function deleteColumn($name, $table)
-    {
-        $path = $this->buildPath(static::COLUMN_DELETE_ENDPOINT, [$name, $table]);
-
-        return $this->performRequest('DELETE', $path);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function deleteGroup($id, $hard = false)
+    public function deleteRole($id, $hard = false)
     {
         return $this->deleteItem('directus_groups', $id, $hard);
     }
@@ -475,29 +469,7 @@ class ClientRemote extends BaseClientRemote
     /**
      * @inheritdoc
      */
-    public function deleteTable($name)
-    {
-        $path = $this->buildPath(static::TABLE_DELETE_ENDPOINT, $name);
-
-        return $this->performRequest('DELETE', $path);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getActivity(array $params = [])
-    {
-        $path = $this->buildPath(static::ACTIVITY_GET_ENDPOINT);
-
-        return $this->performRequest('GET', $path, [
-            'query' => $params
-        ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getRandom(array $options = [])
+    public function getRandomString(array $options = [])
     {
         $path = $this->buildPath(static::UTILS_RANDOM_ENDPOINT);
 
@@ -522,5 +494,21 @@ class ClientRemote extends BaseClientRemote
         $data['options'] = $options;
 
         return $this->performRequest('POST', $path, ['body' => $data]);
+    }
+
+    /**
+     * Glues array of IDs into a CSV
+     *
+     * @param mixed $id
+     *
+     * @return string
+     */
+    protected function parseId($id)
+    {
+        if (is_array($id)) {
+            $id = implode(',', $id);
+        }
+
+        return $id;
     }
 }

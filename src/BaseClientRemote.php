@@ -11,8 +11,8 @@
 namespace Directus\SDK;
 
 use Directus\SDK\Exception\UnauthorizedRequestException;
-use Directus\SDK\Response\Entry;
-use Directus\SDK\Response\EntryCollection;
+use Directus\SDK\Response\Item;
+use Directus\SDK\Response\ItemCollection;
 use Directus\Util\ArrayUtils;
 use GuzzleHttp\Client as HTTPClient;
 use GuzzleHttp\Exception\ClientException;
@@ -46,14 +46,14 @@ abstract class BaseClientRemote extends AbstractClient
      *
      * @var string
      */
-    protected $baseEndpoint;
+    protected $baseProjectUrl;
 
     /**
      * API Version
      *
      * @var string
      */
-    protected $apiVersion;
+    protected $project;
 
     /**
      * Directus Hosted endpoint format.
@@ -152,8 +152,8 @@ abstract class BaseClientRemote extends AbstractClient
             $this->baseUrl = sprintf($this->hostedBaseUrlFormat, $instanceKey);
         }
 
-        $this->apiVersion = isset($options['version']) ? $options['version'] : $this->getDefaultAPIVersion();
-        $this->baseEndpoint = $this->baseUrl . '/api/' . $this->getAPIVersion();
+        $this->project = isset($options['project']) ? $options['project'] : $this->getDefaultProject();
+        $this->baseProjectUrl = $this->baseUrl . '/' . $this->getProject();
 
         $this->setHTTPClient($this->getDefaultHTTPClient());
     }
@@ -163,9 +163,9 @@ abstract class BaseClientRemote extends AbstractClient
      *
      * @return string
      */
-    public function getBaseEndpoint()
+    public function getBaseProjectUrl()
     {
-        return $this->baseEndpoint;
+        return $this->baseProjectUrl;
     }
 
     /**
@@ -183,19 +183,19 @@ abstract class BaseClientRemote extends AbstractClient
      *
      * @return int|string
      */
-    public function getAPIVersion()
+    public function getProject()
     {
-        return $this->apiVersion;
+        return $this->project;
     }
 
     /**
-     * Gets the default API version
+     * Gets the default API project
      *
      * @return string
      */
-    public function getDefaultAPIVersion()
+    public function getDefaultProject()
     {
-        return '1.1';
+        return '_';
     }
 
     /**
@@ -258,7 +258,7 @@ abstract class BaseClientRemote extends AbstractClient
         $baseUrlAttr = $this->isPsr7Version() ? 'base_uri' : 'base_url';
 
         return new HTTPClient([
-            $baseUrlAttr => rtrim($this->baseEndpoint, '/') . '/'
+            $baseUrlAttr => $this->baseUrl
         ]);
     }
 
@@ -275,11 +275,11 @@ abstract class BaseClientRemote extends AbstractClient
     /**
      * Perform a HTTP Request
      *
-     * @param $method
-     * @param $path
+     * @param string $method
+     * @param string $path
      * @param array $params
      *
-     * @return Entry|EntryCollection
+     * @return Item|ItemCollection
      *
      * @throws UnauthorizedRequestException
      */
@@ -353,7 +353,7 @@ abstract class BaseClientRemote extends AbstractClient
             ];
 
             $body = ArrayUtils::get($options, 'body', null);
-            $uri = UriResolver::resolve(new Uri($this->getBaseEndpoint() . '/'), new Uri($path));
+            $uri = UriResolver::resolve(new Uri($this->getBaseProjectUrl() . '/'), new Uri($path));
 
             if ($body) {
                 $body = json_encode($body);

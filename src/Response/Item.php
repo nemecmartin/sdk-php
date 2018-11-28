@@ -16,7 +16,7 @@ use Directus\Util\ArrayUtils;
  *
  * @author Welling Guzmán <welling@rngr.org>
  */
-class Entry implements ResponseInterface, \ArrayAccess
+class Item implements ResponseInterface, \ArrayAccess
 {
     /**
      * @var array
@@ -29,7 +29,7 @@ class Entry implements ResponseInterface, \ArrayAccess
     protected $rawData = null;
 
     /**
-     * @var Entry
+     * @var Item
      */
     protected $metadata = null;
 
@@ -45,17 +45,14 @@ class Entry implements ResponseInterface, \ArrayAccess
             return;
         }
 
-        // Support API 1.1
-        if (isset($data['data']) && is_array($data['data'])) {
-            $this->metadata = new static(ArrayUtils::get($data, 'meta', []));
-            unset($data['meta']);
+        $this->metadata = new static(ArrayUtils::get($data, 'meta', []));
+        unset($data['meta']);
 
-            $data = $data['data'];
-        }
+        $data = $data['data'];
 
-        foreach($data as $field => $value) {
-            if (isset($value['rows']) || (isset($value['data']) && ArrayUtils::isNumericKeys($value['data']))) {
-                $this->data[$field] = new EntryCollection($value);
+        foreach ($data as $field => $value) {
+            if (isset($value['data']) && ArrayUtils::isNumericKeys($value['data'])) {
+                $this->data[$field] = new ItemCollection($value);
             } else if (is_array($value)) {
                 $this->data[$field] = new static($value);
             } else {
@@ -77,7 +74,7 @@ class Entry implements ResponseInterface, \ArrayAccess
     /**
      * Get the entry metadata
      *
-     * @return Entry
+     * @return Item
      */
     public function getMetaData()
     {

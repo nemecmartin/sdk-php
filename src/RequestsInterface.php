@@ -10,8 +10,8 @@
 
 namespace Directus\SDK;
 
-use Directus\SDK\Response\Entry;
-use Directus\SDK\Response\EntryCollection;
+use Directus\SDK\Response\Item;
+use Directus\SDK\Response\ItemCollection;
 
 /**
  * Requests Interface
@@ -21,42 +21,216 @@ use Directus\SDK\Response\EntryCollection;
 interface RequestsInterface
 {
     /**
-     * Gets list of all tables
+     * Finds a list of activity items
      *
      * @param array $params
      *
-     * @return EntryCollection
+     * @return Item
      */
-    public function getTables(array $params = []);
+    public function getActivityList(array $params = []);
 
     /**
-     * Gets the details of the given table
+     * Find one or more activity items
      *
-     * @param $tableName
+     * @param int|array $id
+     * @param array $params
      *
-     * @return Entry
+     * @return Item
      */
-    public function getTable($tableName);
+    public function getActivity($id, array $params = []);
 
     /**
-     * Gets columns of a given table
+     * Creates a new comment in a collection's item
      *
-     * @param $tableName
-     * @param $params
+     * @param string $collection
+     * @param mixed $item
+     * @param string $message
      *
-     * @return EntryCollection
+     * @return Item
      */
-    public function getColumns($tableName, array $params = []);
+    public function createComment($collection, $item, $message);
+
+    /**
+     * Updates a comment from a collection's item
+     *
+     * @param int $id
+     * @param string $message
+     *
+     * @return Item
+     */
+    public function updateComment($id, $message);
+
+    /**
+     * Deletes a comment from a collection's item
+     *
+     * @param int $id
+     *
+     * @return void
+     */
+    public function deleteComment($id);
+
+    /**
+     * Creates a collection
+     *
+     * @param string $name
+     * @param array $data
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function createCollection($name, array $data, array $params = []);
+
+    /**
+     * Finds a list of all Collections
+     *
+     * @param array $params
+     *
+     * @return ItemCollection
+     */
+    public function getCollections(array $params = []);
+
+    /**
+     * Finds a Collection by name
+     *
+     * @param string $name
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function getCollection($name, array $params = []);
+
+    /**
+     * Updates a collection
+     *
+     * @param $name
+     * @param array $data
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function updateCollection($name, array $data, array $params = []);
+
+    /**
+     * Deletes a collection
+     *
+     * @param string $name
+     *
+     * @return void
+     */
+    public function deleteCollection($name);
+
+    /**
+     * Creates a new Collection Preset
+     *
+     * @param array $data
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function createCollectionPresets(array $data, array $params = []);
+
+    /**
+     * Finds a list of all Collection Presets
+     *
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function getCollectionPresets(array $params = []);
+
+    /**
+     * Find a Collection Preset with the given ID
+     *
+     * @param int $id
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function getCollectionPreset($id, array $params = []);
+
+    /**
+     * Updates a Collection Preset
+     *
+     * @param int $id
+     * @param array $data
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function updateCollectionPreset($id, array $data, array $params = []);
+
+    /**
+     * Deletes a bookmark
+     *
+     * @param int $id
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function deleteCollectionPresets($id, array $params = []);
+
+    /**
+     * Creates a field in the given collection
+     *
+     * @param string $collection
+     * @param string $name
+     * @param array $data
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function createField($collection, $name, array $data, array $params = []);
+
+    /**
+     * Finds all fields that belongs to a given collection
+     *
+     * @param string $collection
+     * @param array $params
+     *
+     * @return ItemCollection
+     */
+    public function getFields($collection, array $params = []);
+
+    /**
+     * Finds all fields from all collections
+     *
+     * @param array $params
+     *
+     * @return ItemCollection
+     */
+    public function getAllFields(array $params = []);
 
     /**
      * Gets the details of a given table's column
      *
-     * @param $tableName
-     * @param $columnName
+     * @param $collection
+     * @param $name
      *
-     * @return Entry
+     * @return Item
      */
-    public function getColumn($tableName, $columnName);
+    public function getField($collection, $name);
+
+    /**
+     * Updates a field in a given collection
+     *
+     * @param string $collection
+     * @param string $name
+     * @param array $data
+     * @param array $params
+     *
+     * @return Item
+     */
+    public function updateField($collection, $name, array $data, array $params = []);
+
+    /**
+     * Deletes a field
+     *
+     * @param string $collection
+     * @param string $name
+     *
+     * @return void
+     */
+    public function deleteField($collection, $name);
 
     /**
      * Fetch Items from a given table
@@ -64,7 +238,7 @@ interface RequestsInterface
      * @param string $tableName
      * @param array $options
      *
-     * @return EntryCollection
+     * @return ItemCollection
      */
     public function getItems($tableName, array $options = []);
 
@@ -75,7 +249,7 @@ interface RequestsInterface
      * @param string $tableName
      * @param array $options
      *
-     * @return Entry
+     * @return Item
      */
     public function getItem($tableName, $id, array $options = []);
 
@@ -84,7 +258,7 @@ interface RequestsInterface
      *
      * @param array $params
      *
-     * @return EntryCollection
+     * @return ItemCollection
      */
     public function getUsers(array $params = []);
 
@@ -94,41 +268,41 @@ interface RequestsInterface
      * @param $id
      * @param array $params
      *
-     * @return Entry
+     * @return Item
      */
     public function getUser($id, array $params = []);
 
     /**
      * Gets a list of User groups
      *
-     * @return EntryCollection
+     * @return ItemCollection
      */
-    public function getGroups();
+    public function getRoles();
 
     /**
      * Gets the information of a given user group
      *
      * @param $groupID
      *
-     * @return Entry
+     * @return Item
      */
-    public function getGroup($groupID);
+    public function getRole($groupID);
 
     /**
      * Get a given group privileges
      *
      * @param $groupID
      *
-     * @return EntryCollection
+     * @return ItemCollection
      */
-    public function getGroupPrivileges($groupID);
+    public function getRolePermissions($groupID);
 
     /**
      * Gets a list fo files
      *
      * @param array $params - Parameters
      *
-     * @return EntryCollection
+     * @return ItemCollection
      */
     public function getFiles(array $params = []);
 
@@ -137,7 +311,7 @@ interface RequestsInterface
      *
      * @param $fileID
      *
-     * @return Entry
+     * @return Item
      */
     public function getFile($fileID);
 
@@ -149,41 +323,14 @@ interface RequestsInterface
     public function getSettings();
 
     /**
-     * Gets all settings in a given collection name
-     *
-     * @param $collectionName
-     *
-     * @return EntryCollection
-     */
-    public function getSettingsByCollection($collectionName);
-
-    /**
      * Updates settings in the given collection
      *
      * @param $collection
      * @param $data
      *
-     * @return Entry
+     * @return Item
      */
     public function updateSettings($collection, array $data);
-
-    /**
-     * Gets messages with the given ID
-     *
-     * @param $id
-     *
-     * @return Entry
-     */
-    public function getMessage($id);
-
-    /**
-     * Gets all messages from the given user ID
-     *
-     * @param $userId
-     *
-     * @return EntryCollection
-     */
-    public function getMessages($userId = null);
 
     /**
      * Create a new item in the given table name
@@ -191,7 +338,7 @@ interface RequestsInterface
      * @param $tableName
      * @param array $data
      *
-     * @return Entry
+     * @return Item
      */
     public function createItem($tableName, array $data);
 
@@ -210,7 +357,7 @@ interface RequestsInterface
      * Deletes the given item id(s)
      *
      * @param string $tableName
-     * @param string|array|Entry|EntryCollection $ids
+     * @param string|array|Item|ItemCollection $ids
      * @param bool $hard
      *
      * @return int
@@ -222,7 +369,7 @@ interface RequestsInterface
      *
      * @param array $data
      *
-     * @return Entry
+     * @return Item
      */
     public function createUser(array $data);
 
@@ -239,7 +386,7 @@ interface RequestsInterface
     /**
      * Deletes the given user id(s)
      *
-     * @param string|array|Entry|EntryCollection $ids
+     * @param string|array|Item|ItemCollection $ids
      * @param bool $hard
      *
      * @return int
@@ -251,7 +398,7 @@ interface RequestsInterface
      *
      * @param File $file
      *
-     * @return Entry
+     * @return Item
      */
     public function createFile(File $file);
 
@@ -268,7 +415,7 @@ interface RequestsInterface
     /**
      * Deletes the given file id(s)
      *
-     * @param string|array|Entry|EntryCollection $ids
+     * @param string|array|Item|ItemCollection $ids
      * @param bool $hard
      *
      * @return int
@@ -276,136 +423,22 @@ interface RequestsInterface
     public function deleteFile($ids, $hard = false);
 
     /**
-     * Creates a new Bookmark
-     *
-     * @param $data
-     *
-     * @return Entry
-     */
-    public function createBookmark($data);
-
-    /**
-     * Gets a Bookmark with the given id
-     *
-     * @param int $id
-     *
-     * @return Entry
-     */
-    public function getBookmark($id);
-
-    /**
-     * Gets a Bookmarks
-     *
-     * @param int $userId
-     *
-     * @return Entry
-     */
-    public function getBookmarks($userId = null);
-
-    /**
-     * Creates a new Table preferences
-     *
-     * @param $data
-     *
-     * @return Entry
-     */
-    public function createPreferences($data);
-
-    /**
-     * Creates a new Column
-     *
-     * @param $data
-     *
-     * @return Entry
-     */
-    public function createColumn($data);
-
-    /**
      * Creates a new group
      *
      * @param $data
      *
-     * @return Entry
+     * @return Item
      */
-    public function createGroup(array $data);
-
-    /**
-     * Creates new message
-     *
-     * @param array $data
-     *
-     * @return Entry
-     */
-    public function createMessage(array $data);
-
-    /**
-     * Sends a new message
-     *
-     * Alias of createMessage
-     *
-     * @param array $data
-     *
-     * @return Entry
-     */
-    public function sendMessage(array $data);
+    public function createRole(array $data);
 
     /**
      * Creates a new privileges/permissions
      *
      * @param array $data
      *
-     * @return Entry
+     * @return Item
      */
-    public function createPrivileges(array $data);
-
-    /**
-     * Creates
-     *
-     * @param $name
-     * @param array $data
-     *
-     * @return Entry
-     */
-    public function createTable($name, array $data = []);
-
-    /**
-     * Creates/Updates column ui options
-     *
-     * @param array $data
-     *
-     * @return Entry
-     */
-    public function createColumnUIOptions(array $data);
-
-    /**
-     * Gets preferences
-     *
-     * @param $table
-     * @param $user
-     *
-     * @return Entry
-     */
-    public function getPreferences($table, $user);
-
-    /**
-     * Deletes a bookmark
-     *
-     * @param $id
-     * @param bool $hard
-     *
-     * @return Entry
-     */
-    public function deleteBookmark($id, $hard = false);
-
-    /**
-     * Deletes a column
-     *
-     * @param $name
-     * @param $table
-     *
-     * @return Entry
-     */
-    public function deleteColumn($name, $table);
+    public function createPermissions(array $data);
 
     /**
      * Deletes a group
@@ -413,36 +446,18 @@ interface RequestsInterface
      * @param $id
      * @param bool $hard
      *
-     * @return Entry
+     * @return Item
      */
-    public function deleteGroup($id, $hard = false);
-
-    /**
-     * Deletes a table
-     *
-     * @param $name
-     *
-     * @return Entry
-     */
-    public function deleteTable($name);
-
-    /**
-     * Gets activity records
-     *
-     * @param array $params
-     *
-     * @return Entry
-     */
-    public function getActivity(array $params = []);
+    public function deleteRole($id, $hard = false);
 
     /**
      * Gets a random alphanumeric string
      *
      * @param array $options
      *
-     * @return Entry
+     * @return Item
      */
-    public function getRandom(array $options = []);
+    public function getRandomString(array $options = []);
 
     /**
      * Gets a hashed value from the given string
@@ -450,7 +465,7 @@ interface RequestsInterface
      * @param string $string
      * @param array $options
      *
-     * @return Entry
+     * @return Item
      */
     public function getHash($string, array $options = []);
 }

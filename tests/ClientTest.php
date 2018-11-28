@@ -37,7 +37,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->setAccessToken('newToken');
         $this->assertSame('newToken', $client->getAccessToken());
 
-        $this->assertSame($client->getDefaultAPIVersion(), $client->getAPIVersion());
+        $this->assertSame($client->getDefaultProject(), $client->getProject());
         $this->assertNull($client->getInstanceKey());
     }
 
@@ -47,16 +47,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             'base_url' => 'http://directus.local'
         ]);
 
-        $this->assertSame('http://directus.local/api/' . $client->getDefaultAPIVersion(), $client->getBaseEndpoint());
+        $this->assertSame('http://directus.local/api/' . $client->getDefaultProject(), $client->getBaseProjectUrl());
 
         $client = \Directus\SDK\ClientFactory::create('token', [
             'base_url' => 'http://directus.local',
             'version' => 2
         ]);
 
-        $this->assertSame('http://directus.local/api/2', $client->getBaseEndpoint());
+        $this->assertSame('http://directus.local/api/2', $client->getBaseProjectUrl());
 
-        $this->assertEquals(2, $client->getAPIVersion());
+        $this->assertEquals(2, $client->getProject());
     }
 
     public function testHostedClient()
@@ -65,16 +65,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client = \Directus\SDK\ClientFactory::create('token', ['instance_key' => $instanceKey]);
 
         $expectedBaseUrl = 'https://'.$instanceKey.'.directus.io';
-        $expectedEndpoint = $expectedBaseUrl . '/api/' . $client->getDefaultAPIVersion();
+        $expectedEndpoint = $expectedBaseUrl . '/api/' . $client->getDefaultProject();
         $this->assertSame($expectedBaseUrl, $client->getBaseUrl());
-        $this->assertSame($expectedEndpoint, $client->getBaseEndpoint());
+        $this->assertSame($expectedEndpoint, $client->getBaseProjectUrl());
 
         $client = \Directus\SDK\ClientFactory::create('token', [
             'base_url' => 'http://directus.local',
             'instance_key' => $instanceKey
         ]);
 
-        $this->assertSame($expectedEndpoint, $client->getBaseEndpoint());
+        $this->assertSame($expectedEndpoint, $client->getBaseProjectUrl());
         $this->assertEquals($instanceKey, $client->getInstanceKey());
     }
 
@@ -139,33 +139,33 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testFetchTables()
     {
         $this->mockResponse('fetchTables.txt');
-        $response = $this->client->getTables();
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
+        $response = $this->client->getCollections();
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
 
         $this->mockResponse('fetchTablesEmpty.txt');
-        $response = $this->client->getTables();
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
+        $response = $this->client->getCollections();
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
     }
 
     public function testFetchTableInformation()
     {
         $this->mockResponse('fetchTableInformation.txt');
-        $response = $this->client->getTable('articles');
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
+        $response = $this->client->getCollection('articles');
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
 
         $this->mockResponse('fetchTableInformationEmpty.txt');
-        $response = $this->client->getTable('articles');
+        $response = $this->client->getCollection('articles');
         $this->assertFalse($response->getRawData());
     }
 
     public function testFetchTablePreferences()
     {
         $this->mockResponse('fetchTablePreferences.txt');
-        $response = $this->client->getTable('articles');
+        $response = $this->client->getCollection('articles');
         $this->assertInternalType('object', $response);
 
         $this->mockResponse('fetchTablePreferencesEmpty.txt');
-        $response = $this->client->getTable('articles');
+        $response = $this->client->getCollection('articles');
         $this->assertFalse($response->getRawData());
     }
 
@@ -174,7 +174,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->mockResponse('fetchItems.txt');
         $response = $this->client->getUsers();
 
-        $this->assertInstanceOf('\Directus\SDK\Response\EntryCollection', $response);
+        $this->assertInstanceOf('\Directus\SDK\Response\ItemCollection', $response);
         $this->assertArrayHasKey('Active', $response->getMetaData()->getRawData());
         $this->assertArrayHasKey('Draft', $response->getMetaData()->getRawData());
         $this->assertArrayHasKey('Delete', $response->getMetaData()->getRawData());
@@ -182,7 +182,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->mockResponse('fetchItemsEmpty.txt');
         $response = $this->client->getUsers();
 
-        $this->assertInstanceOf('\Directus\SDK\Response\EntryCollection', $response);
+        $this->assertInstanceOf('\Directus\SDK\Response\ItemCollection', $response);
         $this->assertArrayHasKey('Active', $response->getMetaData()->getRawData());
         $this->assertArrayHasKey('Draft', $response->getMetaData()->getRawData());
         $this->assertArrayHasKey('Delete', $response->getMetaData()->getRawData());
@@ -202,23 +202,23 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testFetchColumns()
     {
         $this->mockResponse('fetchColumns.txt');
-        $response = $this->client->getColumns('articles');
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
+        $response = $this->client->getFields('articles');
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
 
         $this->mockResponse('fetchColumnsEmpty.txt');
-        $response = $this->client->getColumns('articles');
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
+        $response = $this->client->getFields('articles');
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
     }
 
     public function testFetchColumnInformation()
     {
         $this->mockResponse('fetchColumnInfo.txt');
-        $response = $this->client->getColumn('articles', 'title');
+        $response = $this->client->getField('articles', 'title');
         $this->assertInternalType('object', $response);
 
         $this->mockResponse('fetchColumnInfoEmpty.txt');
-        $response = $this->client->getColumn('articles', 'name');
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
+        $response = $this->client->getField('articles', 'name');
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
         $this->assertArrayHasKey('message', $response->getRawData());
         $this->assertInternalType('array', $response->getRawData());
     }
@@ -226,39 +226,39 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testFetchGroups()
     {
         $this->mockResponse('fetchGroups.txt');
-        $response = $this->client->getGroups();
-        $this->assertInstanceOf('\Directus\SDK\Response\EntryCollection', $response);
+        $response = $this->client->getRoles();
+        $this->assertInstanceOf('\Directus\SDK\Response\ItemCollection', $response);
         $this->assertSame(1, $response->count());
 
         $this->mockResponse('fetchGroupsEmpty.txt');
-        $response = $this->client->getGroups();
-        $this->assertInstanceOf('\Directus\SDK\Response\EntryCollection', $response);
+        $response = $this->client->getRoles();
+        $this->assertInstanceOf('\Directus\SDK\Response\ItemCollection', $response);
         $this->assertSame(0, $response->count());
     }
 
     public function testFetchGroupInformation()
     {
         $this->mockResponse('fetchGroupInfo.txt');
-        $response = $this->client->getGroup(1);
+        $response = $this->client->getRole(1);
         $this->assertInternalType('object', $response);
 
         $this->mockResponse('fetchGroupInfoEmpty.txt');
-        $response = $this->client->getGroup(2);
+        $response = $this->client->getRole(2);
         $this->assertFalse($response->getRawData());
     }
 
     public function testFetchGroupPrivileges()
     {
         $this->mockResponse('fetchGroupPrivileges.txt');
-        $response = $this->client->getGroupPrivileges(1);
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response[0]);
+        $response = $this->client->getRolePermissions(1);
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response[0]);
         $this->assertArrayHasKey('allow_view', $response[0]->getRawData());
 
         $this->mockResponse('fetchGroupPrivilegesEmpty.txt');
-        $response = $this->client->getGroupPrivileges(30);
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response);
-        $this->assertInstanceOf('\Directus\SDK\Response\Entry', $response[0]);
+        $response = $this->client->getRolePermissions(30);
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response);
+        $this->assertInstanceOf('\Directus\SDK\Response\Item', $response[0]);
         $this->assertArrayNotHasKey('allow_view', $response[0]->getRawData());
     }
 
@@ -266,11 +266,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $this->mockResponse('fetchFiles.txt');
         $response = $this->client->getFiles();
-        $this->assertInstanceOf('\Directus\SDK\Response\EntryCollection', $response);
+        $this->assertInstanceOf('\Directus\SDK\Response\ItemCollection', $response);
 
         $this->mockResponse('fetchFilesEmpty.txt');
         $response = $this->client->getFiles();
-        $this->assertInstanceOf('\Directus\SDK\Response\EntryCollection', $response);
+        $this->assertInstanceOf('\Directus\SDK\Response\ItemCollection', $response);
     }
 
     public function testFetchFileInformation()
@@ -288,13 +288,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $this->mockResponse('fetchSettings.txt');
         $response = $this->client->getSettings();
-        $this->assertInternalType('object', $response);
-    }
-
-    public function testFetchSettingCollection()
-    {
-        $this->mockResponse('fetchSettingsCollection.txt');
-        $response = $this->client->getSettingsByCollection('global');
         $this->assertInternalType('object', $response);
     }
 

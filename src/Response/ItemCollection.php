@@ -17,7 +17,7 @@ use Directus\Util\ArrayUtils;
  *
  * @author Welling Guzmán <welling@rngr.org>
  */
-class EntryCollection implements ResponseInterface, \IteratorAggregate, \ArrayAccess, \Countable
+class ItemCollection implements ResponseInterface, \IteratorAggregate, \ArrayAccess, \Countable
 {
     /**
      * @var array
@@ -30,7 +30,7 @@ class EntryCollection implements ResponseInterface, \IteratorAggregate, \ArrayAc
     protected $rawData = [];
 
     /**
-     * @var Entry
+     * @var Item
      */
     protected $metadata = [];
 
@@ -42,53 +42,15 @@ class EntryCollection implements ResponseInterface, \IteratorAggregate, \ArrayAc
     public function __construct($data)
     {
         $this->rawData = $data;
-        $this->metadata = $this->pickMetadata($data);
+        $this->metadata = new Item(ArrayUtils::get($data, 'meta', []));
 
-        $rows = $this->pickRows($data);
+        $data = ArrayUtils::get($data, 'data', []);
         $items = [];
-        foreach($rows as $row) {
-            $items[] = new Entry($row);
+        foreach ($data as $row) {
+            $items[] = new Item($row);
         }
 
         $this->items = $items;
-    }
-
-    /**
-     * Pick the metadata out of the raw data
-     *
-     * @param $data
-     *
-     * @return Entry
-     */
-    protected function pickMetadata($data)
-    {
-        $metadata = [];
-        if (ArrayUtils::has($data, 'rows')) {
-            $metadata = ArrayUtils::omit($data, 'rows');
-        } else if (ArrayUtils::has($data, 'meta')) {
-            $metadata = ArrayUtils::get($data, 'meta');
-        }
-
-        return new Entry($metadata);
-    }
-
-    /**
-     * Pick the "rows" (items) out of the raw data
-     *
-     * @param $data
-     *
-     * @return array
-     */
-    protected function pickRows($data)
-    {
-        $rows = [];
-        if (ArrayUtils::has($data, 'rows')) {
-            $rows = ArrayUtils::get($data, 'rows', []);
-        } else if (ArrayUtils::has($data, 'data')) {
-            $rows = ArrayUtils::get($data, 'data', []);
-        }
-
-        return $rows;
     }
 
     /**
@@ -114,7 +76,7 @@ class EntryCollection implements ResponseInterface, \IteratorAggregate, \ArrayAc
     /**
      * Get the response metadata
      *
-     * @return Entry
+     * @return Item
      */
     public function getMetaData()
     {
